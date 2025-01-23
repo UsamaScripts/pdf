@@ -1,3 +1,4 @@
+// src/components/PDFDocument.js
 import React from "react";
 import {
   Document,
@@ -8,17 +9,23 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 
-// We won't register any custom fonts; we'll use the PDF default (often Helvetica).
+// Sample dummy data for a simple table
+const dummyData = [
+  { id: 1, name: "Alpha", value: 100 },
+  { id: 2, name: "Bravo", value: 200 },
+  { id: 3, name: "Charlie", value: 300 },
+];
+
 const styles = StyleSheet.create({
   page: {
     padding: 30,
-    backgroundColor: "#f9fafb", // light background
+    backgroundColor: "#f9fafb",
     fontSize: 12,
     fontFamily: "Helvetica", // default PDF font
-    color: "#111827", // near-black text
+    color: "#111827",
   },
   header: {
-    backgroundColor: "#1f2937", // dark gray
+    backgroundColor: "#1f2937",
     color: "#ffffff",
     padding: 10,
     marginBottom: 20,
@@ -32,8 +39,6 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     padding: 15,
     marginBottom: 15,
-    // Subtle shadow effect - won't show up as a true shadow in PDF
-    // but we'll keep it for design clarity
     border: "1pt solid #e5e7eb",
   },
   sectionTitle: {
@@ -48,15 +53,21 @@ const styles = StyleSheet.create({
   divider: {
     marginVertical: 10,
     height: 1,
-    backgroundColor: "#e5e7eb", // light gray
+    backgroundColor: "#e5e7eb",
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
     objectFit: "cover",
     borderRadius: 8,
     marginBottom: 10,
     alignSelf: "center",
+  },
+  chartImage: {
+    width: 250,
+    height: 150,
+    alignSelf: "center",
+    marginBottom: 10,
   },
   footer: {
     position: "absolute",
@@ -64,12 +75,40 @@ const styles = StyleSheet.create({
     left: 30,
     right: 30,
     fontSize: 10,
-    color: "#6b7280", // medium gray
+    color: "#6b7280",
     textAlign: "center",
+  },
+
+  // Table styles
+  table: {
+    display: "flex",
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    marginTop: 10,
+  },
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableCellHeader: {
+    flex: 1,
+    backgroundColor: "#f3f4f6", // light gray
+    borderRightWidth: 1,
+    borderColor: "#e5e7eb",
+    padding: 5,
+    fontWeight: "bold",
+  },
+  tableCell: {
+    flex: 1,
+    borderRightWidth: 1,
+    borderColor: "#e5e7eb",
+    padding: 5,
   },
 });
 
 const PDFDocument = ({ userData }) => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <Document>
       {/* Page 1 */}
@@ -86,7 +125,7 @@ const PDFDocument = ({ userData }) => {
           <View style={styles.divider} />
           <Text style={styles.text}>
             This PDF is generated dynamically based on your data. You can add
-            images, links, charts, and more.
+            images, charts, and more below.
           </Text>
         </View>
 
@@ -107,17 +146,16 @@ const PDFDocument = ({ userData }) => {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>
-          © {new Date().getFullYear()} - Confidential
-        </Text>
+        <Text style={styles.footer}>© {currentYear} - Confidential</Text>
       </Page>
 
-      {/* Page 2 (example). Duplicate as needed for 10-15 pages */}
+      {/* Page 2 */}
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Additional Info</Text>
         </View>
 
+        {/* Details Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Details</Text>
           <Text style={styles.text}>
@@ -125,11 +163,43 @@ const PDFDocument = ({ userData }) => {
           </Text>
         </View>
 
-        {/* Footer */}
-        <Text style={styles.footer}>Page 2 • © {new Date().getFullYear()}</Text>
+        {/* Chart Section (if chartData is available) */}
+        {userData.chartData && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Chart</Text>
+            <Image style={styles.chartImage} src={userData.chartData} />
+            <Text style={styles.text}>
+              This bar chart is generated from user-provided values.
+            </Text>
+          </View>
+        )}
+
+        {/* Table with dummy data */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sample Table</Text>
+          <View style={styles.table}>
+            {/* Header Row */}
+            <View style={styles.tableRow}>
+              <Text style={styles.tableCellHeader}>ID</Text>
+              <Text style={styles.tableCellHeader}>Name</Text>
+              <Text style={styles.tableCellHeader}>Value</Text>
+            </View>
+
+            {/* Data Rows */}
+            {dummyData.map((row) => (
+              <View style={styles.tableRow} key={row.id}>
+                <Text style={styles.tableCell}>{row.id}</Text>
+                <Text style={styles.tableCell}>{row.name}</Text>
+                <Text style={styles.tableCell}>{row.value}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <Text style={styles.footer}>Page 2 • © {currentYear}</Text>
       </Page>
 
-      {/* Add more pages here if needed */}
+      {/* Add more <Page> components if needed for up to 10-15 pages */}
     </Document>
   );
 };
